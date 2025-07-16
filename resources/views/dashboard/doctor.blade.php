@@ -65,7 +65,7 @@
                         @foreach($recentAppointments as $appointment)
                             <tr>
                                 <td>{{ $appointment->patient->full_name }}</td>
-                                <td>{{ $appointment->date->format('Y-m-d') }}</td>
+                                <td>{{ Carbon\Carbon::parse($appointment->date)->format('Y-m-d') }}</td>
                                 <td>{{ $appointment->start_time }}</td>
                                 <td>{{ $appointment->appointmentType->name }}</td>
                                 <td>

@@ -7,50 +7,84 @@ use App\Models\AppointmentType;
 use App\Models\DoctorAvailabilityException;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
+use App\Models\Doctor;
+
 
 class BookingService
 {
-    public function getAvailableSlots($doctor, $date, $appointmentTypeId)
+
+
+    public function availableSlots(Request $request)
     {
-        $weekday = Carbon::parse($date)->dayOfWeek;
 
-        $schedule = $doctor->schedules()->where('weekday', $weekday)->first();
-        if (!$schedule) return [];
 
-        $duration = AppointmentType::find($appointmentTypeId)?->duration_minutes ?? 0;
-        if ($duration === 0) return [];
+        $doctorId = $request->doctor_id;
+        $appointmentTypeId = $request->appointment_type_id;
+        $date = $request->date;
 
-        $exceptions = DoctorAvailabilityException::where('doctor_id', $doctor->id)
-            ->where('date', $date)->first();
-        if ($exceptions && !$exceptions->is_available) return [];
+        if (!$doctorId || !$appointmentTypeId || !$date) {
+            return response()->json(["success" => false, "message" => "Do not receiving any of the three data"]);
+        }
 
-        $start = Carbon::parse($schedule->start_time);
-        $end = Carbon::parse($schedule->end_time);
+        $doctor = Doctor::find($doctorId);
+        $appointmentType = AppointmentType::find($appointmentTypeId);
+
+        if (!$doctor || !$appointmentType) {
+            return response()->json(["success" => false, "message" => "No doctor or apointment with tha id"]);
+        }
+
+
+        // Parse working_hours from JSON
+        $workingHours = json_decode((string) $doctor->working_hours, true);
+        $weekday = strtolower(Carbon::parse($date)->format('l'));
+
+
+        if (
+            !isset($workingHours[$weekday]) ||
+            !in_array((string)$appointmentTypeId, $workingHours[$weekday]['types'] ?? [])
+        ) {
+            return response()->json([
+                "success" => false,
+                "message" => "Selected appointment type is not available for this doctor on the chosen day."
+            ]);
+        }
+
+        $start = Carbon::parse($date . ' ' . $workingHours[$weekday]['start']);
+        $end = Carbon::parse($date . ' ' . $workingHours[$weekday]['end']);
+        $duration = $appointmentType->duration_minutes;
+
+
         $slots = [];
 
         while ($start->copy()->addMinutes($duration)->lte($end)) {
             $slotStart = $start->copy();
             $slotEnd = $start->copy()->addMinutes($duration);
 
+
             $exists = Appointment::where('doctor_id', $doctor->id)
                 ->where('date', $date)
                 ->where(function ($q) use ($slotStart, $slotEnd) {
                     $q->whereBetween('start_time', [$slotStart, $slotEnd->subMinute()])
-                      ->orWhereBetween('end_time', [$slotStart->addMinute(), $slotEnd]);
-                })->exists();
+                        ->orWhereBetween('end_time', [$slotStart->addMinute(), $slotEnd]);
+                })
+                ->exists();
 
-            if (!$exists && now()->addHours(4)->lte($slotStart)) {
+
+            if (!$exists) {
                 $slots[] = [
                     'start' => $slotStart->format('H:i'),
                     'end' => $slotEnd->format('H:i'),
                 ];
+
             }
 
             $start->addMinutes($duration);
         }
 
-        return $slots;
+        return response()->json($slots);
     }
+
 
     public function bookAppointment($patientId, $doctorId, $appointmentTypeId, $date, $startTime)
     {
@@ -61,7 +95,7 @@ class BookingService
             ->where('date', $date)
             ->where(function ($q) use ($startTime, $endTime) {
                 $q->whereBetween('start_time', [$startTime, $endTime])
-                  ->orWhereBetween('end_time', [$startTime, $endTime]);
+                    ->orWhereBetween('end_time', [$startTime, $endTime]);
             })->exists();
 
         if ($conflict || Carbon::parse($startTime)->lt(now()->addHours(4))) {
