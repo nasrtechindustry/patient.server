@@ -17,9 +17,7 @@ class AppointmentUIController extends Controller
         $this->bookingService = $bookingService;
     }
 
-    // --- Web UI Methods ---
 
-    // Show appointment booking form
     public function create()
     {
         return view('appointments.create', [
@@ -28,9 +26,10 @@ class AppointmentUIController extends Controller
         ]);
     }
 
-    // Handle appointment booking from form submit
     public function store(Request $request)
     {
+        // dd($request->all());
+
         $data = $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
             'appointment_type_id' => 'required|exists:appointment_types,id',
@@ -49,7 +48,6 @@ class AppointmentUIController extends Controller
         return redirect()->route('patient.appointments.index')->with('success', 'Appointment booked successfully.');
     }
 
-    // List all appointments for logged-in patient
     public function index()
     {
         $appointments = Appointment::with('doctor', 'appointmentType')
@@ -61,14 +59,12 @@ class AppointmentUIController extends Controller
         return view('appointments.index', compact('appointments'));
     }
 
-    // Cancel appointment (web)
     public function cancel($id)
     {
         $this->bookingService->cancel($id);
         return redirect()->back()->with('status', 'Appointment cancelled.');
     }
 
-    // Reschedule appointment (web)
     public function reschedule(Request $request, $id)
     {
         $data = $request->validate([
@@ -81,7 +77,6 @@ class AppointmentUIController extends Controller
         return redirect()->route('patient.appointments.index')->with('success', 'Appointment rescheduled.');
     }
 
-    // --- JSON API methods (optional) ---
 
     public function availableSlots(Request $request)
     {

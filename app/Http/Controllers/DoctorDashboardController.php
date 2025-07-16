@@ -12,43 +12,46 @@ class DoctorDashboardController extends Controller
     {
         $doctor = auth()->guard('doctor')->user();
 
-        // Decode JSON string if necessary, fallback to empty array
         $workingHours = $doctor->working_hours
             ? json_decode($doctor->working_hours, true)
             : [];
 
 
+        $recentAppointments = $doctor->appointments()
+            ->with('patient', 'appointmentType')
+            ->latest('date')
+            ->limit(5)
+            ->get();
 
-        $appointmentTypes = AppointmentType::all();
-        $exceptions = $doctor->exceptions()->orderBy('date')->get();
+        $today = now()->toDateString();
 
-        $filterDate = $request->get('filter_date');
-        $filterDepartment = $request->get('filter_department');
+        $todayAppointmentsCount = $doctor->appointments()
+            ->where('date', $today)
+            ->count();
+        $totalPatients = $doctor->appointments()
+            ->distinct('patient_id')
+            ->count('patient_id');
 
-        $appointmentsQuery = Appointment::with(['patient', 'appointmentType'])
-            ->where('doctor_id', $doctor->id);
+        $upcomingAppointmentsCount = $doctor->appointments()
+            ->where('date', '>', $today)
+            ->where('status', '!=', 'cancelled')
+            ->count();
 
-        if ($filterDate) {
-            $appointmentsQuery->where('date', $filterDate);
-        }
-        if ($filterDepartment) {
-            $appointmentsQuery->whereHas('doctor.departments', function ($q) use ($filterDepartment) {
-                $q->where('id', $filterDepartment);
-            });
-        }
-
-        $appointments = $appointmentsQuery->orderBy('date', 'desc')->paginate(10);
-
-        $departments = $doctor->departments;
+        $cancelledAppointmentsCount = $doctor->appointments()
+            ->where('status', 'cancelled')
+            ->count();
 
         return view('dashboard.doctor', compact(
             'workingHours',
-            'appointmentTypes',
-            'exceptions',
-            'appointments',
-            'departments'
+            'recentAppointments',
+            'todayAppointmentsCount',
+            'totalPatients',
+            'upcomingAppointmentsCount',
+            'cancelledAppointmentsCount'
         ));
     }
+
+
 
     public function profile()
     {
