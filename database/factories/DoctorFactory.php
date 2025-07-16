@@ -13,6 +13,7 @@ class DoctorFactory extends Factory
         return [
             'name' => $this->faker->name,
             'password' => Hash::make('password'),
+            'email' => $this->faker->email,
             'specialization' => $this->faker->randomElement(['Cardiologist', 'Pediatrician', 'Surgeon']),
         ];
     }

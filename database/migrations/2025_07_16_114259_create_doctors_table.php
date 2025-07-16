@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('doctors', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('email')->unique();
             $table->string('password');
-            $table->string('specialization');
+            $table->string('specialization')->nullable();
+            $table->json('working_hours')->nullable();
+            $table->rememberToken();
             $table->timestamps();
         });
     }

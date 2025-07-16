@@ -12,10 +12,9 @@ class Doctor extends Authenticatable
     use HasFactory;
 
     protected $guard = 'patient';
-    protected $fillable = ['full_name', 'email', 'password'];
+    protected $fillable = ['name', 'email', 'password'];
     protected $hidden = ['password', 'remember_token'];
 
-    // In Doctor.php
     protected $casts = [
         'working_hours' => 'array',
     ];
@@ -41,4 +40,8 @@ class Doctor extends Authenticatable
     {
         return $this->hasMany(Appointment::class);
     }
+    public function exceptions()
+{
+    return $this->hasMany(DoctorAvailabilityException::class);
+}
 }

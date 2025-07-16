@@ -6,18 +6,22 @@ use Illuminate\Http\Request;
 use App\Models\Appointment;
 use App\Models\AppointmentType;
 
-
 class DoctorDashboardController extends Controller
 {
     public function index(Request $request)
     {
         $doctor = auth()->guard('doctor')->user();
 
-        $workingHours = $doctor->working_hours ?? []; 
+        // Decode JSON string if necessary, fallback to empty array
+        $workingHours = $doctor->working_hours
+            ? json_decode($doctor->working_hours, true)
+            : [];
+
+
+
         $appointmentTypes = AppointmentType::all();
         $exceptions = $doctor->exceptions()->orderBy('date')->get();
 
-        // Filters
         $filterDate = $request->get('filter_date');
         $filterDepartment = $request->get('filter_department');
 
@@ -28,7 +32,6 @@ class DoctorDashboardController extends Controller
             $appointmentsQuery->where('date', $filterDate);
         }
         if ($filterDepartment) {
-            // Assuming doctor's departments relationship & filter by dept id if needed
             $appointmentsQuery->whereHas('doctor.departments', function ($q) use ($filterDepartment) {
                 $q->where('id', $filterDepartment);
             });
@@ -45,5 +48,56 @@ class DoctorDashboardController extends Controller
             'appointments',
             'departments'
         ));
+    }
+
+    public function profile()
+    {
+        return view('dashboard.doctor.profile');
+    }
+
+    public function workingHours()
+    {
+        $doctor = auth()->guard('doctor')->user();
+        $workingHours = $doctor->working_hours ?? [];
+        $appointmentTypes = AppointmentType::all();
+
+        return view('dashboard.doctor.working-hours', compact('workingHours', 'appointmentTypes'));
+    }
+
+    public function exceptions()
+    {
+        $doctor = auth()->guard('doctor')->user();
+        $exceptions = $doctor->exceptions()->orderBy('date')->get();
+
+        return view('dashboard.doctor.exceptions', compact('exceptions'));
+    }
+
+    public function appointments(Request $request)
+    {
+        $doctor = auth()->guard('doctor')->user();
+        $filterDate = $request->get('filter_date');
+        $filterDepartment = $request->get('filter_department');
+
+        $appointmentsQuery = Appointment::with(['patient', 'appointmentType'])
+            ->where('doctor_id', $doctor->id);
+
+        if ($filterDate) {
+            $appointmentsQuery->where('date', $filterDate);
+        }
+        if ($filterDepartment) {
+            $appointmentsQuery->whereHas('doctor.departments', function ($q) use ($filterDepartment) {
+                $q->where('id', $filterDepartment);
+            });
+        }
+
+        $appointments = $appointmentsQuery->orderBy('date', 'desc')->paginate(10);
+        $departments = $doctor->departments;
+
+        return view('dashboard.doctor.appointments', compact('appointments', 'departments'));
+    }
+
+    public function export()
+    {
+        return view('dashboard.doctor.export');
     }
 }

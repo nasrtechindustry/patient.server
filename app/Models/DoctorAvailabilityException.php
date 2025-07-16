@@ -11,6 +11,10 @@ class DoctorAvailabilityException extends Model
 
     protected $fillable = ['doctor_id', 'date', 'is_available', 'reason'];
 
+    protected $casts = [
+        'date' => 'date', 
+    ];
+
     public function doctor()
     {
         return $this->belongsTo(Doctor::class);
