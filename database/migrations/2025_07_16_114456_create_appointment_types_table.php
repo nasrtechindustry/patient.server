@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('appointment_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // physical, diagnostic, follow-up
-            $table->integer('duration_minutes'); // e.g. 15, 30
+            $table->string('name');
+            $table->integer('duration_minutes');
             $table->timestamps();
         });
     }

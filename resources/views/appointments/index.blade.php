@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('dashboard.patient-layout')
 
-@section('content')
+
+@section('patient-dashboard-content')
 <div class="container">
     <h2>Your Appointments</h2>
 

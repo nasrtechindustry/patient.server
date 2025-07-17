@@ -23,77 +23,12 @@
 
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel Appointment System') }}
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto align-items-center">
-
-                        {{-- Patient Authenticated --}}
-                        @auth('patient')
-                            <li class="nav-item me-3">
-                                <span class="navbar-text">
-                                    {{ auth('patient')->user()->full_name }}
-                                </span>
-                            </li>
-                            <li class="nav-item">
-                                <form id="patient-logout-form" action="{{ route('patient.logout') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-link nav-link" style="display:inline; padding:0; border:none; cursor:pointer;">
-                                        Logout
-                                    </button>
-                                </form>
-                            </li>
-                        @endauth
-
-                        {{-- Doctor Authenticated --}}
-                        @auth('doctor')
-                            <li class="nav-item me-3">
-                                <span class="navbar-text">
-                                    Dr. {{ auth('doctor')->user()->name }}
-                                </span>
-                            </li>
-                            <li class="nav-item">
-                                <form id="doctor-logout-form" action="{{ route('doctor.logout') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-link nav-link" style="display:inline; padding:0; border:none; cursor:pointer;">
-                                        Logout
-                                    </button>
-                                </form>
-                            </li>
-                        @endauth
-
-                        {{-- Neither Patient Nor Doctor Authenticated --}}
-                        @guest('patient')
-                            @guest('doctor')
-                                @if (Route::has('patient.login'))
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('patient.login') }}">Patient Login</a>
-                                    </li>
-                                @endif
-                                @if (Route::has('doctor.login'))
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('doctor.login') }}">Doctor Login</a>
-                                    </li>
-                                @endif
-                            @endguest
-                        @endguest
-
-                    </ul>
-                </div>
-            </div>
-        </nav>
 
         <main class="py-4">
             @yield('content')
+
+            
         </main>
     </div>
 

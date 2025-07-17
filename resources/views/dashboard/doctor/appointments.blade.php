@@ -45,7 +45,7 @@
                         @endif
                     </td>
                     <td>
-                        @if($appointment->status === 'scheduled')
+                        @if($appointment->status === 'booked')
                             <form method="POST" action="{{ route('doctor.appointments.cancel', $appointment->id) }}" style="display:inline;">
                                 @csrf
                                 <button class="btn btn-sm btn-danger" onclick="return confirm('Cancel this appointment?')">Cancel</button>

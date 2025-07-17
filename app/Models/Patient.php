@@ -9,6 +9,6 @@ class Patient extends Authenticatable
 {
     use HasFactory;
     protected $guard = 'patient';
-    protected $fillable = ['full_name', 'email', 'password'] ;
+    protected $fillable = ['full_name', 'email', 'password' ,'phone'] ;
     protected $hidden = ['password', 'remember_token'];
 }

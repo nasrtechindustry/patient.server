@@ -39,7 +39,7 @@
                                 href="{{ route('doctor.dashboard') }}">
                                 <i class="bi bi-person-fill me-2"></i> Onboarding
                             </a>
-                        </li>   
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('doctor.dashboard.profile') ? 'active' : '' }}"
                                 href="{{ route('doctor.dashboard.profile') }}">
@@ -76,6 +76,17 @@
 
             {{-- Main Content --}}
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 rounded shadow-sm">
+                    <div class="container-fluid">
+                        <span class="navbar-text me-auto">
+                            Welcome, {{ auth()->guard('doctor')->user()->name ?? 'Doctor' }}
+                        </span>
+                        <form method="POST" action="{{ route('doctor.logout') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+                        </form>
+                    </div>
+                </nav>
                 @yield('doctor-dashboard-content')
             </main>
         </div>

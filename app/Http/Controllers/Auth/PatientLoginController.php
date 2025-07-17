@@ -10,7 +10,7 @@ class PatientLoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.patient-login'); // create this Blade view
+        return view('auth.patient-login');
     }
 
     public function login(Request $request)

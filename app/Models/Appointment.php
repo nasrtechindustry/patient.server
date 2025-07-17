@@ -26,4 +26,8 @@ class Appointment extends Model
     {
         return $this->belongsTo(AppointmentType::class);
     }
+
+    public function doctor() {
+        return $this->belongsTo(Doctor::class);
+    }
 }

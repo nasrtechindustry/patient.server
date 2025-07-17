@@ -76,10 +76,18 @@ class BookingService
                     'start' => $slotStart->format('H:i'),
                     'end' => $slotEnd->format('H:i'),
                 ];
-
             }
 
+
+
             $start->addMinutes($duration);
+        }
+
+        if (empty($slots)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No available slots for the selected date and type.'
+            ]);
         }
 
         return response()->json($slots);
@@ -98,8 +106,12 @@ class BookingService
                     ->orWhereBetween('end_time', [$startTime, $endTime]);
             })->exists();
 
-        if ($conflict || Carbon::parse($startTime)->lt(now()->addHours(4))) {
-            throw ValidationException::withMessages(['slot' => 'Slot unavailable']);
+        if ($conflict) {
+            throw ValidationException::withMessages(['slot' => 'This time slot is already booked.']);
+        }
+
+        if (Carbon::parse($startTime)->lt(now()->addHours(4))) {
+            throw ValidationException::withMessages(['slot' => 'Appointments must be booked at least 4 hours in advance.']);
         }
 
         return Appointment::create([
@@ -116,12 +128,15 @@ class BookingService
     public function reschedule($appointmentId, $newDate, $newStartTime)
     {
         $appointment = Appointment::findOrFail($appointmentId);
+        $originalStart = Carbon::parse($appointment->date . ' ' . $appointment->start_time);
 
         if (
             $appointment->reschedule_count >= 1 ||
-            now()->diffInHours(Carbon::parse($appointment->start_time), false) < 12
+            now()->diffInHours($originalStart, false) < 12
         ) {
-            throw ValidationException::withMessages(['reschedule' => 'Not allowed']);
+            throw ValidationException::withMessages([
+                'reschedule' => 'Reschedule not allowed. Only one reschedule allowed and it must be done at least 12 hours before the appointment.'
+            ]);
         }
 
         $new = $this->bookAppointment(
@@ -131,6 +146,7 @@ class BookingService
             $newDate,
             $newStartTime
         );
+
 
         $appointment->update(['status' => 'rescheduled', 'reschedule_count' => 1]);
 

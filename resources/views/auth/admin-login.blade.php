@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mt-5" style="max-width: 400px">
-    <h4 class="mb-4">Doctor Login</h4>
+    <h4 class="mb-4">Admin Login</h4>
     <form method="POST" action="{{ route('doctor.login') }}">
         @csrf
 
@@ -21,6 +21,7 @@
         @enderror
 
         <button type="submit" class="btn btn-success w-100">Login</button>
+        <a href="{{ route('home') }}"></a>
     </form>
 </div>
 @endsection

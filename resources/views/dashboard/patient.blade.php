@@ -1,18 +1,6 @@
-@extends('layouts.app')
+@extends('dashboard.patient-layout')
 
-@section('content')
-<div class="container mt-4">
-    <h2>Patient Dashboard</h2>
-    <p>Welcome, {{ auth()->guard('patient')->user()->full_name ?? 'Patient' }}!</p>
-
-    <div class="mt-4">
-        <a href="{{ route('patient.appointments.create') }}" class="btn btn-primary">
-            Book New Appointment
-        </a>
-
-        <a href="{{ route('patient.appointments.index') }}" class="btn btn-secondary ms-2">
-            View My Appointments
-        </a>
-    </div>
-</div>
+@section('patient-dashboard-content')
+    <h2>Welcome, {{ auth()->guard('patient')->user()->full_name }}!</h2>
+    <p>Use the sidebar to book or view appointments.</p>
 @endsection

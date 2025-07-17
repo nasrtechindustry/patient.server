@@ -17,14 +17,14 @@ class DoctorLoginController extends Controller
     // Handle login post
     public function login(Request $request)
     {
-        $credentials = $request->only('name', 'password');
+        $credentials = $request->only('email', 'password');
 
         if (Auth::guard('doctor')->attempt($credentials)) {
             return redirect()->intended(route('doctor.dashboard'));
         }
 
         return back()->withErrors([
-            'name' => 'Invalid credentials',
+            'email' => 'Invalid credentials',
         ])->withInput();
     }
 

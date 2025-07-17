@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('doctor_schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('doctor_id')->constrained()->onDelete('cascade');
-            $table->tinyInteger('weekday'); // 0 = Sunday, 1 = Monday
+            $table->tinyInteger('weekday');
             $table->time('start_time');
             $table->time('end_time');
             $table->timestamps();
